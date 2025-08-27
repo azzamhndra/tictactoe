@@ -58,65 +58,51 @@ function GameController() {
 
   const getActivePlayer = () => activePlayer;
 
-  const updateGame = () => {
-    let gameCondition = false;
-    const board = gameboard.getGameboard();
-    const marker = getActivePlayer().marker;
-    //Diagonal
-    if(
-        (board[0] === marker && board[4] === marker && board[8] === marker) ||
-        (board[2] === marker && board[4] === marker && board[6] === marker)
-    )  {
-        gameCondition = true;
-    }
+  const gameRules = () => {
+    const winPattern = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6],
+    ];
 
-    //Baris
-    if(
-        (board[0] === marker && board[1] === marker && board[2] === marker) ||
-        (board[3] === marker && board[4] === marker && board[5] === marker) ||
-        (board[6] === marker && board[7] === marker && board[8] === marker)
-    )  {
-        gameCondition = true;
-    }
-
-    //Kolom
-    if(
-        (board[0] === marker && board[3] === marker && board[6] === marker) ||
-        (board[1] === marker && board[4] === marker && board[7] === marker) ||
-        (board[2] === marker && board[5] === marker && board[8] === marker)
-    )  {
-        gameCondition = true;
-    }
+    const checkWin = (marker) => {
+      return winPattern.some((combo) =>
+        combo.every((index) => gameboard.getGameboard()[index] === marker)
+      );
+    };
 
     return {
-        gameCondition
-    }
-  }
+      checkWin,
+    };
+  };
 
   const playRound = (position) => {
-
     if (!gameboard.getAvailableSquare().includes(position)) {
       console.log("Square already taken.");
       return;
-    } 
-    else {
+    } else {
       gameboard.putMarker(getActivePlayer(), position);
     }
 
-    const { gameCondition } = updateGame();
+    const { checkWin } = gameRules();
 
     console.log(
-      `Dropping ${getActivePlayer().name}'s marker into square ${position}...`
+      `Putting ${getActivePlayer().name}'s marker into square ${position}.`
     );
 
-    if(gameCondition) {
-        console.log(`${getActivePlayer().name} menang`);
-        return;
+    if (checkWin(getActivePlayer().marker)) {
+      console.log(`${getActivePlayer().name} menang`);
+      return;
+    } else {
+      switchPlayerTurn();
     }
 
-    if(!gameCondition) switchPlayerTurn();
     gameboard.printGameboard();
-
   };
 
   gameboard.printGameboard();
@@ -127,8 +113,9 @@ function GameController() {
 }
 
 const game = GameController();
-game.playRound(0); // Player 1
-game.playRound(1); // Player 2
-game.playRound(4); // Player 1
-game.playRound(2); // Player 2
-game.playRound(8); // Player 1 menang
+
+game.playRound(0);
+game.playRound(1);
+game.playRound(4);
+game.playRound(2);
+game.playRound(8);
